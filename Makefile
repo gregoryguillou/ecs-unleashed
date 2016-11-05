@@ -40,6 +40,8 @@ init:
 		@$(file > $(CONFIG_ENV),uniquekey = "$(UNIQUEKEY)")
 		@$(file >> $(CONFIG_ENV),region = "$(REGION)")
 		@$(file >> $(CONFIG_ENV),netprefix = "10.1")
+		@$(file >> $(CONFIG_ENV),keypair = "mysql-key")
+		@$(file >> $(CONFIG_ENV),ami = "ami-9398d3e0")
 		@- cd $(TERRAFORM_DIR) && terraform get && \
 			TF_VAR_uniquekey=$(UNIQUEKEY) terraform apply && \
 			terraform remote config \
@@ -103,4 +105,17 @@ output:
 		echo
 	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) clean
 
-.PHONY: init infrastructure output
+list:
+	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) STATE=infrastructure config
+	@echo && echo "Infrastructure:" && \
+		echo "---------------" && \
+		cd $(INFRASTRUCTURE_DIR) && terraform state list && \
+		echo
+	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) clean
+
+show:
+	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) STATE=infrastructure config
+	@cd $(INFRASTRUCTURE_DIR) && terraform state show $(RESOURCE)
+	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) clean
+
+.PHONY: init infrastructure output list show

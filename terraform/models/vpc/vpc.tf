@@ -25,6 +25,8 @@ variable "netprefix" {
 
 resource "aws_vpc" "main" {
     cidr_block = "${var.netprefix}.0.0/16"
+  enable_dns_hostnames = true
+  enable_dns_support = true
 
     tags {
         name = "${var.shortname}"
@@ -210,4 +212,20 @@ resource "aws_security_group" "ssh" {
 
 output "ssh_security_group" {
   value = "${aws_security_group.ssh.id}"
+}
+
+resource "aws_route53_zone" "phz" {
+  name = "${var.shortname}.local"
+  comment = "Private Hosted Zone for ${aws_vpc.main.id}"
+
+  vpc_id = "${aws_vpc.main.id}"
+
+  tags = {
+    env = "${var.shortname}"
+    uniquekey = "${var.uniquekey}"
+  }
+}
+
+output "phz_zone" {
+  value = "${aws_route53_zone.phz.zone_id}"
 }

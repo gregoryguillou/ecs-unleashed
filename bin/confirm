@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+read -r -p "$(echo -e "$@ [yes/\033[1mno\033[0m]") " response
+case $response in
+  yes)
+  exit 0
+  ;;
+  *)
+  exit 1
+  ;;
+esac

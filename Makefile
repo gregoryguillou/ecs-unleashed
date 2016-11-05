@@ -95,4 +95,12 @@ destroy:
 infrastructure:
 	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) STATE=$(@) deploy
 
-.PHONY: init infrastructure
+output:
+	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) STATE=infrastructure config
+	@echo && echo "Infrastructure:" && \
+		echo "---------------" && \
+		cd $(INFRASTRUCTURE_DIR) && terraform output && \
+		echo
+	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) clean
+
+.PHONY: init infrastructure output

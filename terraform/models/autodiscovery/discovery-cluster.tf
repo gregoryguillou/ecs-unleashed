@@ -56,6 +56,10 @@ resource "aws_ecs_cluster" "autodiscovery" {
   }
 }
 
+output "cluster" {
+  value = "${aws_ecs_cluster.autodiscovery.id}"
+}
+
 resource "aws_security_group" "consul_sg" {
   name = "${var.shortname}-discovery-sg"
   description = "Security group for the EC2 instances of the Discovery ECS cluster"
@@ -111,6 +115,21 @@ resource "aws_security_group" "consul_sg" {
 
 }
 
+resource "aws_security_group" "docker_sg" {
+  name = "${var.shortname}-docker-sg"
+  description = "Security group for the EC2 instances to access docker"
+  vpc_id = "${var.vpc}"
+
+  ingress {
+    from_port = 32768
+    to_port = 61000
+    protocol = "tcp"
+    cidr_blocks = [
+      "0.0.0.0/0"]
+  }
+
+}
+
 resource "aws_autoscaling_group" "autodiscovery" {
   name = "${var.shortname}-autodiscovery"
   launch_configuration = "${aws_launch_configuration.autodiscovery.name}"
@@ -119,7 +138,6 @@ resource "aws_autoscaling_group" "autodiscovery" {
   max_size = 3
   vpc_zone_identifier = [
     "${var.subnets}"]
-
 
   lifecycle {
     create_before_destroy = true
@@ -145,6 +163,7 @@ resource "aws_launch_configuration" "autodiscovery" {
   key_name = "${var.keypair}"
   security_groups = [
     "${aws_security_group.consul_sg.id}",
+    "${aws_security_group.docker_sg.id}",
     "${var.security_group}"]
 
   iam_instance_profile = "${aws_iam_instance_profile.autodiscovery_profile.name}"
@@ -282,4 +301,3 @@ data "template_cloudinit_config" "autodiscovery_cloudinit" {
     content = "${data.template_file.consulserver.rendered}"
   }
 }
-

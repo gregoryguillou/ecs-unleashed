@@ -14,20 +14,23 @@ def main():
     """Manages the application root"""
     return ('', 404)
 
-@APP.route('/flask-101/version')
+
+@APP.route('/simple-api/version')
 def appversion():
     """Displays the application version"""
     vfile = open("version.txt", "r")
     version = vfile.read()[:-1]
     vfile.close()
-    return ("{\"version\": \"%s\"}" % version, 200)
+    return ("\\033[1;36m{\"version\": \"%s\"}\\033[0m" % version, 200)
+    # return ("\\033[1;32m{\"version\": \"%s\"}\\033[0m" % version, 200)
 
 @APP.route('/status')
 def status():
     """Provides a status of the API"""
     return('GOOD', 200)
 
-@APP.route('/flask-101/check')
+
+@APP.route('/simple-api/check')
 def check():
     """Returns execution and configuration properties"""
     now = int(datetime.now().strftime('%s'))

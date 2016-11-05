@@ -18,14 +18,16 @@ def getservice(node, service):
     output = requests.get(query).json()
     return "http://"+output[0]["Address"]+":"+str(output[0]["ServicePort"])
 
-@APP.route('/flask-101')
-def flask101():
+
+@APP.route('/simple-api')
+def simpleapi():
     """Cross-Microservice call"""
-    url = getservice(APP.node, "/flask-101")
-    key = requests.get(url + "/flask-101/version", timeout=1)
+    url = getservice(APP.node, "simple-api")
+    key = requests.get(url + "/simple-api/version", timeout=1)
     return (key.text, 200)
 
-@APP.route('/flask-gateway/version')
+
+@APP.route('/simple-gateway/version')
 def appversion():
     """Displays the application version"""
     vfile = open("version.txt", "r")

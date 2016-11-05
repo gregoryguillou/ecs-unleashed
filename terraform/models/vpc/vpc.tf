@@ -219,6 +219,7 @@ resource "aws_route53_zone" "phz" {
   comment = "Private Hosted Zone for ${aws_vpc.main.id}"
 
   vpc_id = "${aws_vpc.main.id}"
+  force_destroy = true
 
   tags = {
     env = "${var.shortname}"

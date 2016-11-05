@@ -12,6 +12,7 @@ endif
 DEPLOYMENTS = $(abspath terraform/deployments)
 CONFIG_DIR = $(abspath terraform/configurations/$(ACCOUNT)/$(ENV))
 CONFIG_ENV = $(CONFIG_DIR)/env.tfvars
+ACCOUNTID = $(shell aws sts get-caller-identity --output text --query 'Account' --profile=$(ACCOUNT)-$(ENV))
 
 ifndef REGION
 	REGION = $(shell grep region $(CONFIG_ENV) | awk '{print $$3}')
@@ -23,11 +24,13 @@ endif
 export TF_VAR_region = $(REGION)
 export TF_VAR_account = $(ACCOUNT)
 export TF_VAR_shortname = $(ENV)
+export TF_VAR_accountid = $(ACCOUNTID)
 
 BOLD_ENV = \033[1m\033[38;5;11m$(ACCOUNT)($(ENV))\033[0m
 
 TERRAFORM_DIR = $(DEPLOYMENTS)/terraform
 INFRASTRUCTURE_DIR = $(DEPLOYMENTS)/infrastructure
+SERVICE_DIR = $(DEPLOYMENTS)/services
 CONFIRM = $(abspath bin/confirm)
 
 init:
@@ -72,12 +75,6 @@ confirm:
 	@$(eval CONTINUE := $(shell $(CONFIRM) "You are about to deploy \033[1;32m$(STATE)\033[0m on $(BOLD_ENV) environment, are you sure you want to proceed ?"; echo $$?))
 	@$(MAKE) CONTINUE=$(CONTINUE) exit
 
-exit:
-ifeq ($(CONTINUE),1)
-	@$(MAKE) FOLDER=$(FOLDER) clean
-	@false
-endif
-
 deploy:
 	@$(MAKE) FOLDER=$(FOLDER) STATE=$(STATE) config
 	@cd $(FOLDER) && terraform get > /dev/null
@@ -90,20 +87,26 @@ destroy:
 	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) STATE=infrastructure config
 	@cd $(INFRASTRUCTURE_DIR) && terraform get \
 	    && terraform plan -destroy -var-file=$(CONFIG_ENV)
-	@$(MAKE) STATE=$(STATE) confirm
-	@cd $(INFRASTRUCTURE_DIR) && terraform destroy -var-file=$(CONFIG_ENV)
+	@$(MAKE) STATE=infrastructure confirm
+	@cd $(INFRASTRUCTURE_DIR) && terraform destroy -force -var-file=$(CONFIG_ENV)
 	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) clean
+
+destroy_services:
+	@$(MAKE) FOLDER=$(SERVICE_DIR) STATE=services config
+	@cd $(SERVICE_DIR) && terraform get \
+	    && terraform plan -destroy -var-file=$(CONFIG_ENV)
+	@$(MAKE) STATE=services confirm
+	@cd $(SERVICE_DIR) && terraform destroy -force -var-file=$(CONFIG_ENV)
+	@$(MAKE) FOLDER=$(SERVICE_DIR) clean
+
+exit:
+ifeq ($(CONTINUE),1)
+	@$(MAKE) FOLDER=$(FOLDER) clean
+	@false
+endif
 
 infrastructure:
 	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) STATE=$(@) deploy
-
-output:
-	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) STATE=infrastructure config
-	@echo && echo "Infrastructure:" && \
-		echo "---------------" && \
-		cd $(INFRASTRUCTURE_DIR) && terraform output && \
-		echo
-	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) clean
 
 list:
 	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) STATE=infrastructure config
@@ -113,9 +116,20 @@ list:
 		echo
 	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) clean
 
+output:
+	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) STATE=infrastructure config
+	@echo && echo "Infrastructure:" && \
+		echo "---------------" && \
+		cd $(INFRASTRUCTURE_DIR) && terraform output && \
+		echo
+	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) clean
+
 show:
 	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) STATE=infrastructure config
 	@cd $(INFRASTRUCTURE_DIR) && terraform state show $(RESOURCE)
 	@$(MAKE) FOLDER=$(INFRASTRUCTURE_DIR) clean
 
-.PHONY: init infrastructure output list show
+services:
+	@$(MAKE) FOLDER=$(SERVICE_DIR) STATE=$(@) deploy
+
+.PHONY: destroy destroy_services init infrastructure list output show services

@@ -36,20 +36,18 @@ module "autodiscovery" {
   source = "../../models/autodiscovery"
 }
 
+module "registry" {
+  shortname = "${var.shortname}"
+  account = "${var.account}"
+  region = "${var.region}"
+  uniquekey = "${var.uniquekey}"
+  source = "../../models/registry"
+}
 
 output "bastion_access" {
   value = "${module.network.bastion_access}"
 }
 
-output "vpc" {
-  value = "${module.network.vpc}"
-}
-output "public_subnets" {
-  value = "${module.network.public-subnets}"
-}
-output "private_subnets" {
-  value = "${module.network.private-subnets}"
-}
-output "ssh_security_group" {
-  value = "${module.network.ssh_security_group}"
+output "autodiscovery_cluster" {
+  value = "${module.autodiscovery.cluster}"
 }

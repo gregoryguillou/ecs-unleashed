@@ -2,28 +2,37 @@
 
 AWS unleashed regroups a set of deployment stacks to start a Terraform/AWS project quickly and efficiently. 
 
-## How to start with new project
+## Starting a new project
 
-In order to start with a project, a few pre-steps are required:
+### Configure the environment
 
-- Starting with a new project assumes you've made a few consideration:
-  - Name the ACCOUNT you want to use. This name can be anything and will only be used to configure (1) the name of configuration directory and (2) the name of the profile. If you've name your account with an alias, you mighyt want to choose the same name
-  - Choose a ENV name for your configuration. That name should be less than 6 characters due to some restructions in the naming length on AWS. It could be staging or prod
-  - Choose a REGION to deploy the configuration
-- Install and configure AWS CLI
-- Create a profile $REGION-$SHORTNAME in the .aws/credentials file and add the Access/Secret keys
-- Install Terraform
-- Install make
-
-Terraform
-Python and AWS CLI
-A configuration to connect to the right account
-
+- If not already done, create an AWS account and a user in IAM that will be able to create and access the resources you plan to build. Get an Access/Secret Key for that user/account
+- Install the required components, including: AWS CLI, Terraform, Git, Make and OpenSSL. If you run on Windows, create a Linux VM to use it.
+- Fork this repository in your GitHub account by clicking the "Fork" button. Once done, clone it from a Linux/Mac machine with ```git clone https://github.com/[your account]/aws-unleashed.git```
+- Choose and set the following environment variables:
+  * ACCOUNT can be any name used to define your AWS account. You can use the name you've choosen to access your account or the account ID for instance
+  * REGION is the AWS region you want to use. Note that most of the models included rely on 3 AZ and you would definitely prefer to use a region that as 3 AZs or more
+  * ENV is a name from the environment you want to build and is used to differentiate between environments. Due to some AWS naming limits, ENV is limited to 6 characters in length.
+- Register the Access/Secret Key with your AWS CLI; We rely on a convention that the profile is named <ACCOUNT>-<ENV> in the project
 ```
-ACCOUNT=resetlogs SHORTNAME=staging REGION=eu-west-1 make seed
+aws configure --profile=$ACCOUNT-$ENV
 ```
 
-## Storing Terraform states on S3
+   Note:
+   It is very important to set the environment variables as expected ; if you don't you might end up destroying some resources of another project. In order to avoid that, don't hesitate to set the variable as part of the command line and disabling the AWS CLI profile you don't want to use, including the default profile vy editing the ```~/.aws/credentials``` file.
+
+### Initialize the project
+
+The project assumes:
+
+- Some variables are store in terraform/configurations/[ACCOUNT]/[SHORTNAME]
+- State files are stored in a S3 bucket. 
+
+As a result, you must initialize your environment first. The command below does that by creating a env.tfvars file with a uniquekey property in terraform/configurations/[ACCOUNT]/[SHORTNAME]. It also creates a S3 bucket named terraform-[SHORTNAME]-[UNIQUEKEY] to store the different state files:
+```
+ACCOUNT=resetlogs SHORTNAME=staging REGION=eu-west-1 make init
+```
+
 
 ## Consul/ECS bootstrap
 

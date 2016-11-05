@@ -31,19 +31,25 @@ INFRASTRUCTURE_DIR = $(DEPLOYMENTS)/infrastructure
 CONFIRM = $(abspath bin/confirm)
 
 init:
-	@$(MAKE) FOLDER=$(TERRAFORM_DIR) clean
-	@$(eval UNIQUEKEY := $(shell openssl rand -hex 8))
-	@$(file > $(CONFIG_ENV),uniquekey = "$(UNIQUEKEY)")
-	@$(file >> $(CONFIG_ENV),region = "$(REGION)")
-	@- cd $(TERRAFORM_DIR) && terraform get && \
-		TF_VAR_uniquekey=$(UNIQUEKEY) terraform apply && \
-		terraform remote config \
-		-backend=S3 \
-		-backend-config="bucket=terraform-$(ENV)-$(UNIQUEKEY)" \
-		-backend-config="key=tf-state/seed.state" \
-		-backend-config="region=$(REGION)" \
-		-backend-config="profile=$(ACCOUNT)-$(ENV)"
-	@$(MAKE) FOLDER=$(TERRAFORM) clean
+	ifeq ("$(wildcard $(CONFIG_ENV))","")
+		$(error environment is already defined)
+	else
+		@$(MAKE) FOLDER=$(TERRAFORM_DIR) clean
+		@$(eval UNIQUEKEY := $(shell openssl rand -hex 8))
+		@$(shell mkdir -p $(CONFIG_DIR))
+		@$(file > $(CONFIG_ENV),uniquekey = "$(UNIQUEKEY)")
+		@$(file >> $(CONFIG_ENV),region = "$(REGION)")
+		@$(file >> $(CONFIG_ENV),netprefix = "10.1")
+		@- cd $(TERRAFORM_DIR) && terraform get && \
+			TF_VAR_uniquekey=$(UNIQUEKEY) terraform apply && \
+			terraform remote config \
+			-backend=S3 \
+			-backend-config="bucket=terraform-$(ENV)-$(UNIQUEKEY)" \
+			-backend-config="key=tf-state/seed.state" \
+			-backend-config="region=$(REGION)" \
+			-backend-config="profile=$(ACCOUNT)-$(ENV)"
+		@$(MAKE) FOLDER=$(TERRAFORM_DIR) clean
+	endif
 
 clean:
 	@- cd $(FOLDER) && terraform remote config -disable 2>/dev/null

@@ -24,3 +24,7 @@ output "public_subnets" {
 output "private_subnets" {
   value = "${module.network.private-subnets}"
 }
+
+output "ssh_security_group" {
+  value = "${module.network.ssh_security_group}"
+}

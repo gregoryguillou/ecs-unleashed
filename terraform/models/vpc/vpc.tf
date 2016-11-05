@@ -203,3 +203,7 @@ resource "aws_security_group" "ssh" {
     uniquekey = "${var.uniquekey}"
   }
 }
+
+output "ssh_security_group" {
+  value = "${aws_security_group.ssh.id}"
+}

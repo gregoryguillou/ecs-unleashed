@@ -6,7 +6,7 @@ This project demonstrates the deployment of Consul with AWS EC2 Container Servic
 
 The overall architecture the project generates is shown below: 
 
--> ![ECS Unleashed Overview](architecture.png) <-
+![ECS Unleashed Overview](architecture.png)
 
 It includes:
 
@@ -105,7 +105,7 @@ ACCOUNT=[youraccount] ENV=[yourenv] make destroy
 
 You are ready to demonstrate some of the benefits of Consul with ECS. Instead of relying on Loadbalancers to connect services one-another, you can now rely on the registry consul provide. The goal of the ```simple-gateway``` and ```simple-api``` containers is to demonstrate that ability the way they work is summarized below:
 
--> ![Blue/Green Deployment](docker-upgrade.png) <-
+![Blue/Green Deployment](docker-upgrade.png)
 
 To perform that demonstration, query the ```simple-api``` application through ```simple-gateway```:
 - Connect with SSH to the bastion with the address displayed as an output of the ```make infrastructure``` command 

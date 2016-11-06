@@ -1,6 +1,4 @@
-# A simple Blue/Green Container Update with AWS ECS and Consul 
-
-This project demonstrates the deployment of Consul with AWS EC2 Container Services (ECS). It heavily relies on Terraform and, obviously, Docker. It is intended to demonstrate some of the benefits of Consul with ECS. It is also a "simple but yet complete/scalable stack" for testing and learning. It should be easy enough to setup so that people can fork it and do some interesting stuff. Whether it may or may not be used to bootstrap a production configuration is actually a good question. 
+This project demonstrates the deployment of Consul with AWS EC2 Container Services (ECS). It heavily relies on Terraform and, obviously, Docker. It is intended to demonstrate some of the benefits of Consul with ECS staring with blue/green ugrades. It is also a "simple but yet complete/scalable stack" for testing and learning. It should be easy enough to setup so that people can fork it and do some interesting stuff. Whether it may or may not be used to bootstrap a production configuration is actually a good question. 
 
 ## Overview
 

@@ -43,8 +43,9 @@ init:
 		@$(file > $(CONFIG_ENV),uniquekey = "$(UNIQUEKEY)")
 		@$(file >> $(CONFIG_ENV),region = "$(REGION)")
 		@$(file >> $(CONFIG_ENV),netprefix = "10.1")
-		@$(file >> $(CONFIG_ENV),keypair = "mysql-key")
-		@$(file >> $(CONFIG_ENV),ami = "ami-9398d3e0")
+		@$(file >> $(CONFIG_ENV),keypair = "")
+		@$(file >> $(CONFIG_ENV),ami-ec2 = "ami-9398d3e0")
+		@$(file >> $(CONFIG_ENV),ami-ecs = "ami-e988c39a")
 		@- cd $(TERRAFORM_DIR) && terraform get && \
 			TF_VAR_uniquekey=$(UNIQUEKEY) terraform apply && \
 			terraform remote config \
